@@ -51,6 +51,61 @@ if (isset($_SERVER['HTTP_THIS_IS_AJAAAAAX'])) {
         } else {
             echo json_encode($errorMessage);
         }
+    # DELETE BOOK
+    } else if ($_SERVER['REQUEST_METHOD'] === 'DELETE') {
+        $id = intval(file_get_contents('php://input'));
+        if ($book = Book::loadById($conn, $id)) {
+            if ($book->delete($conn)) {
+                echo "Success";
+            } else {
+                echo $conn->error;
+            }
+        } else {
+            echo $conn->error;
+        }
+    # UPDATE BOOK
+    } else if ($_SERVER['REQUEST_METHOD'] === 'PUT') {
+        parse_str(file_get_contents('php://input'), $data);
+        $id = $data['id'];
+        $title = $data['add-title'];
+        $author = $data['add-author'];
+        $isbn = $data['add-isbn'];
+        $description = $data['add-description'];
+
+        $errorMessage = [];
+        if (empty($title)) {
+            $errorMessage["title-validation"] = "Title not provided";
+        }
+        if (empty($author)) {
+            $errorMessage["author-validation"] = "Author not provided";
+        }
+        if (empty($isbn)) {
+            $errorMessage["isbn-validation"] = "ISBN not provided";
+        }
+        if (empty($description)) {
+            $errorMessage["description-validation"] = "Description not provided";
+        }
+
+        if (empty($errorMessage)) {
+            if ($book = Book::loadById($conn, $id)) {
+                $book->setTitle($conn->real_escape_string($title));
+                $book->setAuthor($conn->real_escape_string($author));
+                $book->setIsbn($conn->real_escape_string($isbn));
+                $book->setDescription($conn->real_escape_string($description));
+
+                if ($book->update($conn)) {
+                    echo "Success";
+                } else {
+                    $errorMessage[] = $conn->error;
+                    echo json_encode($errorMessage);
+                }
+            } else {
+                $errorMessage[] = $conn->error;
+                echo json_encode($errorMessage);
+            }
+        } else {
+            echo json_encode($errorMessage);
+        }
     }
 } else {
     die("This page cannot be displayed directly");
