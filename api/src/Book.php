@@ -9,7 +9,7 @@
 
 require_once 'conn.php';
 
-class Book
+class Book implements JsonSerializable
 {
     private $id;
     private $title;
@@ -24,6 +24,17 @@ class Book
         $this->author = "";
         $this->description = "";
         $this->isbn = "";
+    }
+
+    public function jsonSerialize()
+    {
+        return [
+            'id' => $this->id,
+            'title' => $this->title,
+            'author' => $this->author,
+            'description' => $this->description,
+            'isbn' => $this->isbn
+        ];
     }
 
     /**
